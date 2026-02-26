@@ -26,7 +26,14 @@ jobs:
           go-version: '^1.24'
       - name: generate release artifacts
         run: |
-          make release PROD_REGISTRY=$PROD_REGISTRY
+          if [ -n "${{ vars.PROD_REGISTRY }}" ]; then
+            # The GitHub Action variable is defined, so we use it.
+            make release PROD_REGISTRY=${{ vars.PROD_REGISTRY }}
+          else
+            # The GitHub Action variable is not defined, so we
+            # use the default, which is defined in the Makefile.
+            make release
+          fi
       - name: generate release notes
         run: |
           make release-notes
