@@ -26,7 +26,7 @@ jobs:
           go-version: '^1.23'
       - name: generate release artifacts
         run: |
-          make release
+          make release PROD_REGISTRY=$PROD_REGISTRY
       - name: generate release notes
         run: |
           make release-notes
