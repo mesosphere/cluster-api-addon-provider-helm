@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: write # Allow to create a release.
-  packages: write # Allow to create a package.
 
 jobs:
   build:
@@ -25,15 +24,6 @@ jobs:
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # tag=v6.3.0
         with:
           go-version: '^1.24'
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # tag=v3.7.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: publish image
-        run: |
-          make docker-build-all docker-push-all TAG=${{ env.RELEASE_TAG }} REGISTRY=${{ vars.REGISTRY }}
       - name: generate release artifacts
         run: |
           make release PROD_REGISTRY=${{ vars.REGISTRY }}
