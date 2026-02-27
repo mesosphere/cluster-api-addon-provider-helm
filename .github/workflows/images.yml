@@ -7,13 +7,10 @@ on:
     - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 permissions:
-  contents: write # Allow to create a release.
+  packages: write # Allow to create a package.
 
 jobs:
   build:
-    name: create draft release
-    runs-on: ubuntu-latest
-    steps:
       - name: Set env
         run:  echo "RELEASE_TAG=${GITHUB_REF:10}" >> $GITHUB_ENV
       - name: checkout code
@@ -24,16 +21,12 @@ jobs:
         uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # tag=v6.2.0
         with:
           go-version: '^1.24'
-      - name: generate release artifacts
-        run: |
-          make release PROD_REGISTRY=${{ vars.REGISTRY }}
-      - name: generate release notes
-        run: |
-          make release-notes
-      - name: Release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # tag=v2.5.0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # tag=v3.7.0
         with:
-          draft: true
-          files: out/*
-          body_path: _releasenotes/release-notes-${{ env.RELEASE_TAG }}.md
-
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: publish image
+        run: |
+          make docker-build-all docker-push-all TAG=${{ env.RELEASE_TAG }} REGISTRY=${{ vars.REGISTRY }}
